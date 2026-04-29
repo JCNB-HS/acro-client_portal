@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>세무법인 ACRO — 종합소득세 업무현황 조회</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #f5f5f3; color: #111; -webkit-font-smoothing: antialiased; min-height: 100vh; }
+button, input, select, textarea { font-family: inherit; }
+
+:root {
+  --blue: #1a4fc4; --blue2: #1340a0; --blt: #eef2fb;
+  --ink2: #444; --ink3: #777; --ink4: #aaa;
+  --bd: #e0e0dc; --bd2: #c8c8c2;
+  --bg1: #f5f5f3; --bg2: #ffffff; --bg3: #f0f0ee;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+}
+
+/* ── 레이아웃 ── */
+.wrap    { max-width: 640px; margin: 0 auto; padding: 0 20px; }
+.wrap-lg { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+/* ── 헤더 ── */
+.header {
+  background: linear-gradient(135deg, #111e30 0%, #162844 100%);
+  padding: 48px 24px 56px;
+  position: relative; overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+.header::after {
+  content: '';
+  position: absolute; top: -60px; right: -60px;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(74,158,255,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.header-inner { position: relative; z-index: 1; }
+.logo-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 28px;
+}
+.logo-mark {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--blue); display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900; color: #fff; letter-spacing: -0.02em;
+}
+.logo-text { font-size: 14px; font-weight: 800; color: rgba(255,255,255,0.9); letter-spacing: 0.06em; }
+.header-kicker {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  color: rgba(255,255,255,0.5); margin-bottom: 12px; display: block;
+}
+.header-title {
+  font-size: clamp(26px, 5vw, 38px); font-weight: 900;
+  line-height: 1.22; letter-spacing: -0.02em;
+  color: #fff; margin-bottom: 12px;
+}
+.header-sub {
+  font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.5);
+}
+
+/* ── 탭 ── */
+.tab-bar {
+  display: flex; gap: 0;
+  background: var(--bg3); border-radius: 11px; padding: 4px;
+  margin-bottom: 20px;
+}
+.tab-btn {
+  flex: 1; padding: 10px 16px; border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  background: transparent; color: var(--ink3);
+  transition: all .15s;
+}
+.tab-btn.active {
+  background: #fff; color: var(--blue);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1), 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* ── 입력 폼 카드 ── */
+.form-card {
+  background: #fff; border-radius: 16px;
+  padding: 28px 28px 24px;
+  box-shadow: var(--shadow-md);
+  margin-top: -28px;
+  position: relative; z-index: 10;
+}
+
+.fl { display: block; font-size: 13px; font-weight: 700; color: var(--ink2); margin-bottom: 7px; }
+.fi {
+  width: 100%; padding: 13px 15px;
+  border: 1.5px solid var(--bd2); border-radius: 10px;
+  font-size: 15px; color: #111; background: #fff;
+  transition: border .15s;
+}
+.fi:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,79,196,0.1); }
+.fi::placeholder { color: var(--ink4); }
+
+.input-row { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+.input-group { display: flex; flex-direction: column; gap: 0; }
+.input-pair { display: flex; gap: 10px; }
+.input-pair .fi { flex: 1; }
+
+.btn-pri {
+  width: 100%; padding: 14px;
+  background: var(--blue); color: #fff;
+  border: none; border-radius: 11px;
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  transition: background .15s, transform .1s;
+}
+.btn-pri:hover { background: var(--blue2); }
+.btn-pri:active { transform: scale(0.99); }
+
+/* ── 결과 카드 ── */
+.result-wrap { margin-top: 16px; }
+
+.result-card {
+  background: #fff; border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  animation: slideUp .3s ease;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-header {
+  padding: 20px 24px 18px;
+  border-bottom: 1px solid var(--bg3);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.result-name { font-size: 18px; font-weight: 800; color: #111; }
+.result-updated { font-size: 12px; color: var(--ink4); }
+
+.result-body { padding: 28px 24px 24px; }
+
+/* ── 스텝 다이어그램 ── */
+.steps-wrap {
+  display: flex; align-items: flex-start;
+  gap: 0; margin-bottom: 0;
+  position: relative;
+}
+
+.step-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  position: relative;
+}
+
+/* 연결선 */
+.step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: 50%; right: -50%;
+  height: 2px;
+  background: var(--bd);
+  z-index: 0;
+  transition: background .3s;
+}
+.step-item.done:not(:last-child)::after {
+  background: var(--blue);
+}
+
+.step-circle {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800;
+  position: relative; z-index: 1;
+  transition: all .3s;
+  border: 2px solid var(--bd);
+  background: #fff; color: var(--ink4);
+}
+.step-item.done .step-circle {
+  background: var(--blue); border-color: var(--blue); color: #fff;
+}
+.step-item.current .step-circle {
+  background: var(--blue); border-color: var(--blue); color: #fff;
+  box-shadow: 0 0 0 5px rgba(26,79,196,0.12);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(26,79,196,0.12); }
+  50%       { box-shadow: 0 0 0 8px rgba(26,79,196,0.06); }
+}
+.step-item.current .step-circle::after {
+  content: '';
+  position: absolute; inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(26,79,196,0.2);
+  animation: ripple 2s ease-in-out infinite;
+}
+@keyframes ripple {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+.step-label {
+  margin-top: 10px; font-size: 11px; font-weight: 700;
+  color: var(--ink4); text-align: center; line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+.step-item.done .step-label   { color: var(--blue); }
+.step-item.current .step-label { color: var(--blue); }
+
+/* ── 메모 말풍선 ── */
+.memo-bubble {
+  margin-top: 20px;
+  background: var(--blt);
+  border: 1.5px solid rgba(26,79,196,0.15);
+  border-radius: 10px;
+  padding: 14px 16px;
+  position: relative;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.memo-bubble::before {
+  content: '';
+  position: absolute;
+  top: -8px; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 8px solid rgba(26,79,196,0.15);
+}
+.memo-bubble::after {
+  content: '';
+  position: absolute;
+  top: -6px; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 7px solid var(--blt);
+}
+.memo-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.memo-text { font-size: 13px; line-height: 1.7; color: #1a3a8a; font-weight: 500; }
+.memo-tag  { font-size: 11px; font-weight: 700; color: var(--blue); display: block; margin-bottom: 4px; letter-spacing: 0.04em; }
+
+/* ── 완료 상태 ── */
+.result-done-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: #e6f4ea; border-radius: 8px; padding: 12px 16px;
+  margin-top: 20px;
+}
+.done-icon { font-size: 18px; }
+.done-text { font-size: 13px; font-weight: 700; color: #1a6e30; }
+
+/* ── 미발견 ── */
+.not-found {
+  background: #fff; border-radius: 16px;
+  padding: 40px 28px; text-align: center;
+  box-shadow: var(--shadow-md);
+  animation: slideUp .3s ease;
+}
+.not-found-icon { font-size: 40px; margin-bottom: 16px; }
+.not-found-title { font-size: 17px; font-weight: 800; color: #111; margin-bottom: 8px; }
+.not-found-sub   { font-size: 14px; color: var(--ink3); line-height: 1.75; }
+
+/* ── 데모 토글 ── */
+.demo-bar {
+  background: #fff8e6; border: 1px dashed #d4a017;
+  border-radius: 10px; padding: 12px 16px;
+  margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+}
+.demo-label { font-size: 12px; font-weight: 700; color: #7a5c00; }
+.demo-btns  { display: flex; gap: 6px; flex-wrap: wrap; }
+.demo-btn {
+  font-size: 11px; font-weight: 700; padding: 5px 11px;
+  border-radius: 6px; border: 1.5px solid #d4a017;
+  background: transparent; color: #7a5c00; cursor: pointer;
+  transition: all .12s;
+}
+.demo-btn:hover  { background: #fff0c0; }
+.demo-btn.active { background: #d4a017; color: #fff; border-color: #d4a017; }
+
+/* ── 푸터 ── */
+footer {
+  border-top: 1px solid var(--bd);
+  padding: 24px;
+  background: var(--bg2);
+  margin-top: 48px;
+}
+.footer-inner {
+  max-width: 640px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 10px;
+}
+.footer-brand { font-weight: 800; font-size: 13px; color: #222; letter-spacing: 0.04em; }
+.footer-sub   { font-size: 11px; color: var(--ink4); }
+.footer-copy  { font-size: 11px; color: var(--ink4); text-align: right; line-height: 1.8; }
+
+@media (max-width: 480px) {
+  .form-card { padding: 22px 18px 20px; }
+  .result-body { padding: 22px 18px 20px; }
+  .step-label { font-size: 10px; }
+  .step-circle { width: 32px; height: 32px; font-size: 12px; }
+  .input-pair { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="wrap header-inner">
+    <div class="logo-row">
+      <div class="logo-mark">A</div>
+      <span class="logo-text">세무법인 ACRO</span>
+    </div>
+    <span class="header-kicker">2025 종합소득세</span>
+    <h1 class="header-title">업무현황 조회</h1>
+    <p class="header-sub">
+      종합소득세 신고 진행 상황을<br>
+      아래에서 직접 확인하실 수 있습니다.
+    </p>
+  </div>
+</div>
+
+<!-- 메인 -->
+<main style="padding-bottom: 48px;">
+  <div class="wrap" style="padding-top: 0;">
+
+    <!-- 입력 폼 카드 -->
+    <div class="form-card">
+
+      <!-- 탭 -->
+      <div class="tab-bar" id="tabBar">
+        <button class="tab-btn active" onclick="switchTab('biz')">사업자 고객</button>
+        <button class="tab-btn" onclick="switchTab('free')">프리랜서 / 비사업자</button>
+      </div>
+
+      <!-- 사업자 입력 -->
+      <div id="panel-biz">
+        <div class="input-row">
+          <div class="input-group">
+            <label class="fl">사업자등록번호</label>
+            <input class="fi" type="text" id="biz-num" placeholder="000-00-00000" maxlength="12" oninput="formatBiz(this)">
+          </div>
+        </div>
+        <button class="btn-pri" onclick="doSearch('biz')">현황 조회</button>
+      </div>
+
+      <!-- 프리랜서 입력 -->
+      <div id="panel-free" style="display:none;">
+        <div class="input-row">
+          <div class="input-group">
+            <label class="fl">이름</label>
+            <input class="fi" type="text" id="free-name" placeholder="홍길동">
+          </div>
+          <div class="input-group">
+            <label class="fl">생년월일 6자리</label>
+            <input class="fi" type="text" id="free-birth" placeholder="900101" maxlength="6" inputmode="numeric">
+          </div>
+          <div class="input-group">
+            <label class="fl">휴대폰 뒤 4자리</label>
+            <input class="fi" type="text" id="free-phone" placeholder="1234" maxlength="4" inputmode="numeric">
+          </div>
+        </div>
+        <button class="btn-pri" onclick="doSearch('free')">현황 조회</button>
+      </div>
+
+    </div>
+
+    <!-- 결과 영역 -->
+    <div class="result-wrap" id="resultWrap" style="display:none;"></div>
+
+    <!-- 데모 토글 (mock 전용) -->
+    <div class="demo-bar" style="margin-top: 20px;">
+      <span class="demo-label">🔧 Mock 데모 — 단계별 미리보기</span>
+      <div class="demo-btns">
+        <button class="demo-btn" onclick="showDemo(1)">① 접수완료</button>
+        <button class="demo-btn" onclick="showDemo(2)">② 자료요청</button>
+        <button class="demo-btn" onclick="showDemo(2,'추가')">② 추가요청</button>
+        <button class="demo-btn" onclick="showDemo(3)">③ 작성중</button>
+        <button class="demo-btn" onclick="showDemo(4)">④ 신고완료</button>
+        <button class="demo-btn" onclick="showNotFound()">미등록</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- 푸터 -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">세무법인 ACRO</div>
+      <div class="footer-sub">Acro Tax Corporation · 서울 강남구</div>
+    </div>
+    <div class="footer-copy">
+      본 페이지는 세무법인 ACRO 고객 전용 업무현황 조회 서비스입니다.<br>
+      기타 문의는 담당자를 통해 안내드립니다.
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── 탭 전환 ── */
+function switchTab(t) {
+  document.getElementById('panel-biz').style.display  = t === 'biz'  ? '' : 'none';
+  document.getElementById('panel-free').style.display = t === 'free' ? '' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && t === 'biz') || (i === 1 && t === 'free'));
+  });
+  hideResult();
+}
+
+/* ── 사업자번호 포맷 ── */
+function formatBiz(el) {
+  let v = el.value.replace(/\D/g, '');
+  if (v.length > 3 && v.length <= 5) v = v.slice(0,3) + '-' + v.slice(3);
+  else if (v.length > 5) v = v.slice(0,3) + '-' + v.slice(3,5) + '-' + v.slice(5,10);
+  el.value = v;
+}
+
+/* ── 조회 (실제 연동 전 mock) ── */
+function doSearch(type) {
+  // GAS 연동 후 이 함수에서 fetch 호출
+  // 현재는 임시 mock 응답
+  const mockData = {
+    found: true, name: '홍*동', step: 2,
+    memo: '홈택스 아이디와 비밀번호를 카카오톡으로 보내주세요.',
+    updated: '2025-05-12'
+  };
+  renderResult(mockData);
+}
+
+function hideResult() {
+  const w = document.getElementById('resultWrap');
+  w.style.display = 'none'; w.innerHTML = '';
+}
+
+/* ── 결과 렌더 ── */
+const STEPS = ['접수 완료','자료 요청 중','신고서 작성 중','신고 완료'];
+const STEP_ICONS = ['✓','📋','✏️','🎉'];
+
+function renderResult(data) {
+  const w = document.getElementById('resultWrap');
+  w.style.display = '';
+
+  if (!data.found) {
+    w.innerHTML = `
+      <div class="not-found">
+        <div class="not-found-icon">🔍</div>
+        <div class="not-found-title">조회 결과가 없습니다</div>
+        <div class="not-found-sub">
+          입력하신 정보로 등록된 내역을 찾을 수 없습니다.<br>
+          담당자에게 문의해 주세요.
+        </div>
+      </div>`;
+    return;
+  }
+
+  /* 스텝 HTML */
+  let stepsHtml = '<div class="steps-wrap">';
+  for (let i = 1; i <= 4; i++) {
+    const isDone    = i < data.step;
+    const isCurrent = i === data.step;
+    const cls = isDone ? 'done' : isCurrent ? 'current' : '';
+    const icon = isDone ? '✓' : isCurrent ? i : i;
+    stepsHtml += `
+      <div class="step-item ${cls}">
+        <div class="step-circle">${isDone ? '✓' : i}</div>
+        <div class="step-label">${STEPS[i-1]}</div>
+      </div>`;
+  }
+  stepsHtml += '</div>';
+
+  /* 메모 / 완료 */
+  let extraHtml = '';
+  if (data.step === 4) {
+    extraHtml = `
+      <div class="result-done-badge">
+        <span class="done-icon">🎉</span>
+        <span class="done-text">종합소득세 신고가 모두 완료되었습니다.</span>
+      </div>`;
+  } else if (data.memo) {
+    extraHtml = `
+      <div class="memo-bubble">
+        <span class="memo-icon">📌</span>
+        <div class="memo-text">
+          <span class="memo-tag">담당자 안내</span>
+          ${data.memo}
+        </div>
+      </div>`;
+  }
+
+  w.innerHTML = `
+    <div class="result-card">
+      <div class="result-header">
+        <span class="result-name">${data.name} 고객님</span>
+        <span class="result-updated">업데이트 ${data.updated}</span>
+      </div>
+      <div class="result-body">
+        ${stepsHtml}
+        ${extraHtml}
+      </div>
+    </div>`;
+}
+
+/* ── 데모 버튼 ── */
+function showDemo(step, type) {
+  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const memos = {
+    1: null,
+    2: '홈택스 아이디와 비밀번호를 카카오톡으로 보내주세요.',
+    3: null,
+    4: null,
+  };
+  const memo = type === '추가'
+    ? '보험료 납입확인서를 추가로 보내주세요.'
+    : memos[step];
+
+  renderResult({ found: true, name: '홍*동', step, memo, updated: '2025-05-12' });
+  document.getElementById('resultWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showNotFound() {
+  document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderResult({ found: false });
+  document.getElementById('resultWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+</body>
+</html>
