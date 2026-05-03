@@ -422,7 +422,7 @@ function renderResult(data) {
         <div class="stepper-line"></div>
         <div class="stepper-dot">${icon}</div>
         <div class="stepper-content">
-          <div class="stepper-label">${STEPS[i-1]}</div>
+          <div class="stepper-label">${STEPS[i-1]}${isCurrent && (i === 4 || i === 5) ? ' <span style="font-size:12px;font-weight:500;color:var(--ink3);">(3~5일 소요)</span>' : ''}</div>
           ${extra}
         </div>
       </div>`;
