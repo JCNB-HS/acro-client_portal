@@ -281,9 +281,7 @@ footer { border-top: 1px solid var(--bd); padding: 22px 24px; background: #fff; 
 </footer>
 
 <script>
-// ================================================================
-// ★ GAS 웹앱 배포 후 아래 URL 교체
-// ================================================================
+// GAS 웹앱 배포 후 아래 URL 교체
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbynsl6Oia4LB4NhFIHrBt9geuSlsfBuIWBrbclBGWdN_wVVbnhoJgKnULWww8z1rbaePw/exec
 ';
 
@@ -387,7 +385,7 @@ function renderResult(data) {
     const isDone    = i < step;
     const isCurrent = i === step;
     const cls  = isDone ? 'done' : isCurrent ? 'current' : '';
-    const icon = isDone ? '✓' : i;
+    const icon = isDone ? 'V' : i;
 
     let extra = '';
     if (isCurrent) {
