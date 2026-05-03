@@ -319,7 +319,7 @@ async function doSearch() {
 
   const btn = document.getElementById('searchBtn');
   btn.disabled = true;
-  btn.textContent = '조회 중…';
+  btn.textContent = '조회 중...';
   showLoading();
 
   try {
@@ -350,7 +350,7 @@ function today() {
 function showLoading() {
   const w = document.getElementById('resultWrap');
   w.style.display = '';
-  w.innerHTML = `<div class="loading"><div class="spinner"></div><div class="loading-text">조회 중입니다…</div></div>`;
+  w.innerHTML = `<div class="loading"><div class="spinner"></div><div class="loading-text">조회 중입니다...</div></div>`;
   w.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
