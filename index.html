@@ -126,6 +126,15 @@ button, input { font-family: inherit; }
   box-shadow: 0 0 0 4px rgba(26,79,196,0.14);
   animation: pulse 2s ease-in-out infinite;
 }
+.stepper-row.hold .stepper-dot {
+  background: #e74c3c; border-color: #e74c3c; color: #fff;
+  box-shadow: 0 0 0 4px rgba(231,76,60,0.14);
+  animation: pulse-red 2s ease-in-out infinite;
+}
+@keyframes pulse-red {
+  0%,100% { box-shadow: 0 0 0 4px rgba(231,76,60,0.14); }
+  50%      { box-shadow: 0 0 0 8px rgba(231,76,60,0.06); }
+}
 @keyframes pulse {
   0%,100% { box-shadow: 0 0 0 4px rgba(26,79,196,0.14); }
   50%      { box-shadow: 0 0 0 8px rgba(26,79,196,0.06); }
@@ -137,6 +146,7 @@ button, input { font-family: inherit; }
 }
 .stepper-row.done .stepper-label    { color: var(--blue); }
 .stepper-row.current .stepper-label { color: #111; font-size: 15px; }
+.stepper-row.hold .stepper-label    { color: #e74c3c; font-size: 15px; }
 
 /* 메모 말풍선 */
 .memo-bubble {
@@ -144,9 +154,14 @@ button, input { font-family: inherit; }
   border: 1.5px solid rgba(26,79,196,0.15); border-radius: 10px;
   padding: 12px 14px; display: flex; align-items: flex-start; gap: 8px;
 }
+.memo-bubble.hold {
+  background: #fdecea; border-color: rgba(231,76,60,0.2);
+}
 .memo-icon { font-size: 14px; flex-shrink: 0; }
 .memo-text { font-size: 13px; line-height: 1.65; color: #1a3a8a; font-weight: 500; }
+.memo-bubble.hold .memo-text { color: #922b21; }
 .memo-tag  { font-size: 11px; font-weight: 700; color: var(--blue); display: block; margin-bottom: 3px; }
+.memo-bubble.hold .memo-tag { color: #e74c3c; }
 
 /* 완료 배지 */
 .done-badge {
@@ -256,6 +271,7 @@ footer { border-top: 1px solid var(--bd); padding: 22px 24px; background: #fff; 
         <button class="demo-btn" onclick="showDemo(2)">②수임</button>
         <button class="demo-btn" onclick="showDemo(3)">③자료</button>
         <button class="demo-btn" onclick="showDemo(4)">④작성</button>
+        <button class="demo-btn" onclick="showDemo(4, true)">④보류</button>
         <button class="demo-btn" onclick="showDemo(5)">⑤검토</button>
         <button class="demo-btn" onclick="showDemo(6)">⑥제출대기</button>
         <button class="demo-btn" onclick="showDemo(7)">⑦신고완료</button>
@@ -282,7 +298,7 @@ footer { border-top: 1px solid var(--bd); padding: 22px 24px; background: #fff; 
 
 <script>
 // GAS 웹앱 배포 후 아래 URL 교체
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbynsl6Oia4LB4NhFIHrBt9geuSlsfBuIWBrbclBGWdN_wVVbnhoJgKnULWww8z1rbaePw/exec';
+const GAS_URL = '';
 
 // 8단계 라벨
 const STEPS = [
@@ -378,23 +394,25 @@ function renderResult(data) {
   }
 
   const step = Number(data.step) || 1;
+  const memo = (data.memo || '').trim();
 
   let rows = '';
   for (let i = 1; i <= 8; i++) {
     const isDone    = i < step;
     const isCurrent = i === step;
-    const cls  = isDone ? 'done' : isCurrent ? 'current' : '';
-    const icon = isDone ? 'V' : i;
+    const isHold    = isCurrent && memo;
+    const cls  = isDone ? 'done' : isHold ? 'hold' : isCurrent ? 'current' : '';
+    const icon = isDone ? 'V' : isHold ? 'X' : i;
 
     let extra = '';
     if (isCurrent) {
       if (i === 8) {
         extra = `<div class="done-badge"><span>🎉</span><span class="done-badge-text">종합소득세 신고 및 안내가 모두 완료되었습니다.</span></div>`;
-      } else if (data.memo) {
+      } else if (memo) {
         extra = `
-          <div class="memo-bubble">
+          <div class="memo-bubble hold">
             <span class="memo-icon">📌</span>
-            <div class="memo-text"><span class="memo-tag">담당자 안내</span>${data.memo}</div>
+            <div class="memo-text"><span class="memo-tag">담당자 안내</span>${memo}</div>
           </div>`;
       }
     }
@@ -422,15 +440,12 @@ function renderResult(data) {
 }
 
 // 데모
-function showDemo(step) {
+function showDemo(step, hold) {
   document.querySelectorAll('.demo-btn').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
   if (step === 0) { renderResult({ found: false }); return; }
-  const memos = {
-    2: '수임 계약서를 카카오톡으로 보내드렸습니다. 서명 후 회신 부탁드립니다.',
-    3: '보험료 납입확인서를 추가로 보내주세요.',
-  };
-  renderResult({ found: true, name: '홍*동', step, memo: memos[step] || '', updated: '2025-05-12' });
+  const memo = hold ? '신고서 작성 중 추가 서류가 필요합니다. 담당자 안내를 확인해 주세요.' : '';
+  renderResult({ found: true, name: '홍*동', step, memo, updated: '2025-05-12' });
 }
 
 // 엔터키
